@@ -12,6 +12,17 @@ The app runs in your browser and does not upload saves anywhere. It can inspect 
 - The Walking Dead: A New Frontier (`wd3_*`)
 - The Walking Dead: The Final Season (`wd4_*`)
 
+## Quick Start
+
+1. Open the web app.
+2. Click **Add save folder**.
+3. Choose `Documents\Telltale Games\The Walking Dead Definitive`.
+4. Pick a slot file from the left side.
+5. Review **Known Choices**, **Detected Strings**, and **Presets**.
+6. Download edited files and manually replace the originals after making a backup.
+
+Do not edit saves while the game is running. If Steam Cloud asks which files to keep, choose local files when you want to keep your edits.
+
 ## Current Status
 
 This is an early, conservative editor. It avoids risky binary rewrites where the file format is not fully mapped yet.
@@ -22,6 +33,7 @@ Working now:
 - Detect game/slot/checkpoint files by filename
 - Scan readable choice/progress strings
 - Edit known text choices when the replacement can be safely encoded
+- Apply Good / Evil / Natural preset targets where safe
 - Export edited files
 - Generate a backup manifest
 
@@ -46,6 +58,10 @@ Open `index.html` in a modern browser, then select your save folder or drag file
 
 Always back up your saves before replacing anything. The app can export edited copies, but browser apps cannot safely patch files in place on every browser.
 
+## License
+
+This project uses the Serofix Non-Commercial Source License. You can read, copy, edit, and publish meaningfully changed versions, but you cannot sell this project or modified versions of it.
+
 ## Development
 
 This repo is static HTML/CSS/JS. No build step is required.
@@ -57,4 +73,3 @@ npx serve .
 ```
 
 Or just open `index.html`.
-

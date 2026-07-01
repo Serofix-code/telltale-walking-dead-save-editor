@@ -21,6 +21,7 @@
     stringCount: document.querySelector("#stringCount"),
     dirtyBadge: document.querySelector("#dirtyBadge"),
     knownChoices: document.querySelector("#knownChoices"),
+    presets: document.querySelector("#presets"),
     detectedStrings: document.querySelector("#detectedStrings"),
     checkpointTools: document.querySelector("#checkpointTools"),
     exportChanged: document.querySelector("#exportChanged"),
@@ -98,6 +99,7 @@
     els.dirtyBadge.classList.toggle("hidden", !file.dirty);
 
     renderKnownChoices(file);
+    renderPresets(file);
     renderStrings(file);
     renderCheckpointTools(file);
   }
@@ -113,7 +115,7 @@
     for (const choice of found) {
       const row = els.choiceTemplate.content.firstElementChild.cloneNode(true);
       row.querySelector(".choice-title").textContent = choice.title;
-      row.querySelector(".choice-desc").textContent = `${choice.description} Offset ${choice.offset}.`;
+      row.querySelector(".choice-desc").textContent = `${choice.episode || "Choice"} · ${choice.description} Offset ${choice.offset}.`;
       row.querySelector(".choice-key").textContent = choice.encodedText;
       const select = row.querySelector(".choice-select");
       for (const value of choice.values) {
@@ -126,6 +128,66 @@
       select.addEventListener("change", () => applyChoice(file, choice, select.value));
       els.knownChoices.append(row);
     }
+  }
+
+  function renderPresets(file) {
+    els.presets.replaceChildren();
+    const presets = window.TWD_PRESETS || [];
+    const choicesByKey = new Map(file.knownChoices.map(choice => [choice.key, choice]));
+    const matchingPresets = presets.filter(preset => Object.keys(preset.values).some(key => choicesByKey.has(key)));
+
+    if (!matchingPresets.length) {
+      els.presets.append(emptyMessage("No preset-compatible choices were detected in this file yet."));
+      return;
+    }
+
+    for (const preset of matchingPresets) {
+      const card = document.createElement("div");
+      card.className = "preset-card";
+      const foundKeys = Object.keys(preset.values).filter(key => choicesByKey.has(key));
+      const changes = foundKeys.filter(key => choicesByKey.get(key).value !== preset.values[key]);
+      card.innerHTML = `
+        <div>
+          <h3>${escapeHtml(preset.title)}</h3>
+          <p>${escapeHtml(preset.description)}</p>
+          <small>${foundKeys.length} detected target${foundKeys.length === 1 ? "" : "s"} · ${changes.length} change${changes.length === 1 ? "" : "s"} needed</small>
+        </div>
+        <button type="button">Apply where safe</button>
+      `;
+      card.querySelector("button").addEventListener("click", () => applyPreset(file, preset));
+      els.presets.append(card);
+    }
+  }
+
+  function applyPreset(file, preset) {
+    let changed = 0;
+    let skipped = 0;
+    const failures = [];
+
+    for (const [key, value] of Object.entries(preset.values)) {
+      const choice = file.knownChoices.find(item => item.key === key);
+      if (!choice || choice.value === value) continue;
+      const nextText = choice.key.startsWith("WalkingDead")
+        ? value
+        : window.TWDSaveFormat.choiceLabel(choice.key, value);
+      const result = window.TWDSaveFormat.patchAscii(file.bytes, choice.offset, choice.encodedText, nextText);
+      if (!result.ok) {
+        skipped += 1;
+        failures.push(`${choice.title}: ${result.reason}`);
+        continue;
+      }
+      file.bytes = result.bytes;
+      file.dirty = true;
+      file.strings = extractStringsAgain(file);
+      file.knownChoices = window.TWDSaveFormat.detectKnownChoices(file);
+      changed += 1;
+    }
+
+    setStatus(`${preset.title} preset: ${changed} applied, ${skipped} skipped`);
+    if (failures.length) {
+      alert(`Some edits were skipped to avoid corrupting the save:\n\n${failures.join("\n")}`);
+    }
+    render();
   }
 
   function applyChoice(file, choice, value) {
@@ -300,4 +362,3 @@
 
   render();
 })();
-

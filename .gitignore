@@ -6,5 +6,6 @@ dist/
 *.estore
 *.epage
 *.prop
+*.save
 backups/
-
+samples/downloaded-save-packs/

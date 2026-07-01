@@ -115,6 +115,35 @@ button:disabled {
   border-radius: 8px;
 }
 
+.instructions {
+  margin: 14px 0;
+  background: rgba(28, 27, 24, .92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.instructions summary {
+  cursor: pointer;
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.instruction-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.instruction-grid p {
+  margin: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+}
+
 .drop-zone {
   margin: 14px 0;
   border: 1px dashed #5f574c;
@@ -224,11 +253,29 @@ button:disabled {
 
 .summary-grid div,
 .choice-row,
+.preset-card,
 .tool-box {
   background: var(--panel-2);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
+}
+
+.preset-card {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 16px;
+  align-items: center;
+}
+
+.preset-card h3,
+.preset-card p {
+  margin: 0 0 6px;
+}
+
+.preset-card p,
+.preset-card small {
+  color: var(--muted);
 }
 
 .summary-grid span {
@@ -323,6 +370,8 @@ input[type="search"] {
   .hero,
   .layout,
   .summary-grid,
+  .instruction-grid,
+  .preset-card,
   .choice-row {
     grid-template-columns: 1fr;
     display: grid;
@@ -332,4 +381,3 @@ input[type="search"] {
     min-width: 0;
   }
 }
-

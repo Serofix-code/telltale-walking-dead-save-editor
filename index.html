@@ -34,6 +34,18 @@
       <button id="clearAll" type="button">Clear</button>
     </section>
 
+    <section class="instructions">
+      <details open>
+        <summary>How to use it safely</summary>
+        <div class="instruction-grid">
+          <p><strong>1.</strong> Close the game before editing saves.</p>
+          <p><strong>2.</strong> Load the full Definitive save folder, not just one file.</p>
+          <p><strong>3.</strong> Download edited copies and keep your originals backed up.</p>
+          <p><strong>4.</strong> If Steam Cloud asks, keep local files to keep your edits.</p>
+        </div>
+      </details>
+    </section>
+
     <section id="dropZone" class="drop-zone">
       <strong>Drop save files here</strong>
       <span>Use files from Documents\Telltale Games\The Walking Dead Definitive.</span>
@@ -84,11 +96,13 @@
 
           <div class="tabs" role="tablist">
             <button class="tab active" data-tab="knownChoices" type="button">Known Choices</button>
+            <button class="tab" data-tab="presets" type="button">Presets</button>
             <button class="tab" data-tab="detectedStrings" type="button">Detected Strings</button>
             <button class="tab" data-tab="checkpointTools" type="button">Checkpoint Tools</button>
           </div>
 
           <section id="knownChoices" class="tab-panel"></section>
+          <section id="presets" class="tab-panel hidden"></section>
           <section id="detectedStrings" class="tab-panel hidden"></section>
           <section id="checkpointTools" class="tab-panel hidden"></section>
         </article>
@@ -112,4 +126,3 @@
   <script src="src/app.js"></script>
 </body>
 </html>
-
