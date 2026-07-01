@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telltale Walking Dead Save Editor</title>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Local HTML save editor</p>
+        <h1>Telltale Walking Dead Save Editor</h1>
+        <p class="subhead">Inspect, back up, and carefully edit Definitive Series save files without uploading them anywhere.</p>
+      </div>
+      <div class="status-panel">
+        <span class="status-dot"></span>
+        <span id="appStatus">Ready</span>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="Load saves">
+      <label class="file-button">
+        <input id="fileInput" type="file" multiple accept=".bundle,.estore,.epage,.prop">
+        Add files
+      </label>
+      <label class="file-button">
+        <input id="folderInput" type="file" webkitdirectory directory multiple>
+        Add save folder
+      </label>
+      <button id="exportChanged" type="button" disabled>Download edited files</button>
+      <button id="exportManifest" type="button" disabled>Download backup manifest</button>
+      <button id="clearAll" type="button">Clear</button>
+    </section>
+
+    <section id="dropZone" class="drop-zone">
+      <strong>Drop save files here</strong>
+      <span>Use files from Documents\Telltale Games\The Walking Dead Definitive.</span>
+    </section>
+
+    <section class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <h2>Files</h2>
+          <span id="fileCount">0</span>
+        </div>
+        <div id="fileList" class="file-list"></div>
+      </aside>
+
+      <section class="workspace">
+        <div id="emptyState" class="empty-state">
+          <h2>No save loaded</h2>
+          <p>Select your save folder to begin. The editor will group slots by season and show detected choices.</p>
+        </div>
+
+        <article id="fileView" class="file-view hidden">
+          <div class="file-title-row">
+            <div>
+              <p id="gameLabel" class="eyebrow">Unknown</p>
+              <h2 id="fileTitle"></h2>
+            </div>
+            <span id="dirtyBadge" class="dirty-badge hidden">Edited</span>
+          </div>
+
+          <div class="summary-grid">
+            <div>
+              <span>Type</span>
+              <strong id="fileType">-</strong>
+            </div>
+            <div>
+              <span>Slot</span>
+              <strong id="slotLabel">-</strong>
+            </div>
+            <div>
+              <span>Size</span>
+              <strong id="fileSize">-</strong>
+            </div>
+            <div>
+              <span>Detected strings</span>
+              <strong id="stringCount">-</strong>
+            </div>
+          </div>
+
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="knownChoices" type="button">Known Choices</button>
+            <button class="tab" data-tab="detectedStrings" type="button">Detected Strings</button>
+            <button class="tab" data-tab="checkpointTools" type="button">Checkpoint Tools</button>
+          </div>
+
+          <section id="knownChoices" class="tab-panel"></section>
+          <section id="detectedStrings" class="tab-panel hidden"></section>
+          <section id="checkpointTools" class="tab-panel hidden"></section>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <template id="choiceRowTemplate">
+    <div class="choice-row">
+      <div>
+        <strong class="choice-title"></strong>
+        <p class="choice-desc"></p>
+        <code class="choice-key"></code>
+      </div>
+      <select class="choice-select"></select>
+    </div>
+  </template>
+
+  <script src="src/choices.js"></script>
+  <script src="src/save-format.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
+
