@@ -51,6 +51,15 @@
       </details>
     </section>
 
+    <section class="risk-warning" id="riskWarning">
+      <div>
+        <strong>Big warning: save editing can corrupt your save.</strong>
+        <p>Back up your entire save folder before changing anything. Telltale saves are binary files, and some edits can break loading, choices, checkpoints, or Steam Cloud sync. By enabling save editing, you accept the risk and responsibility for anything that happens to your saves. The authors are not responsible for lost progress, corrupted files, or broken saves.</p>
+      </div>
+      <button id="enableRiskEditing" type="button">I understand, enable save editing</button>
+      <span id="riskStatus" class="risk-status">Editing locked</span>
+    </section>
+
     <section id="dropZone" class="drop-zone">
       <strong>Drop save files here</strong>
       <span>Use files from Documents\Telltale Games\The Walking Dead Definitive.</span>

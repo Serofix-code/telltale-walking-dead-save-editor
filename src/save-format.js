@@ -88,10 +88,11 @@
     return entries;
   }
 
-  function patchAscii(bytes, offset, oldText, newText) {
+  function patchAscii(bytes, offset, oldText, newText, options = {}) {
     const oldBytes = encoder.encode(oldText);
     const newBytes = encoder.encode(newText);
-    if (oldBytes.length !== newBytes.length) {
+    const allowResize = options.allowResize === true;
+    if (oldBytes.length !== newBytes.length && !allowResize) {
       return {
         ok: false,
         reason: `Unsafe length change: ${oldBytes.length} bytes -> ${newBytes.length} bytes.`
@@ -101,6 +102,17 @@
       if (bytes[offset + i] !== oldBytes[i]) {
         return { ok: false, reason: "Original text no longer matches at this offset." };
       }
+    }
+    if (oldBytes.length !== newBytes.length) {
+      const copy = new Uint8Array(bytes.length - oldBytes.length + newBytes.length);
+      copy.set(bytes.slice(0, offset), 0);
+      copy.set(newBytes, offset);
+      copy.set(bytes.slice(offset + oldBytes.length), offset + newBytes.length);
+      return {
+        ok: true,
+        bytes: copy,
+        warning: `Length changed from ${oldBytes.length} bytes to ${newBytes.length} bytes. This may corrupt the save.`
+      };
     }
     const copy = new Uint8Array(bytes);
     copy.set(newBytes, offset);
@@ -140,4 +152,3 @@
     formatBytes
   };
 })();
-

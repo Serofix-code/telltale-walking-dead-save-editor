@@ -162,6 +162,35 @@ button:disabled {
   color: var(--muted);
 }
 
+.risk-warning {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  margin: 14px 0;
+  background: #3a1614;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.risk-warning p {
+  margin: 6px 0 0;
+  color: #f0d6d1;
+}
+
+.risk-warning button {
+  background: var(--accent);
+  border-color: #e85a52;
+  font-weight: 700;
+}
+
+.risk-status {
+  min-width: 112px;
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
 .drop-zone {
   margin: 14px 0;
   border: 1px dashed #5f574c;
@@ -389,6 +418,7 @@ input[type="search"] {
   .layout,
   .summary-grid,
   .instruction-grid,
+  .risk-warning,
   .preset-card,
   .choice-row {
     grid-template-columns: 1fr;

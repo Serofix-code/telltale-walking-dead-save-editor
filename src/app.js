@@ -1,7 +1,8 @@
 (() => {
   const state = {
     files: [],
-    selectedId: null
+    selectedId: null,
+    riskAccepted: false
   };
 
   const els = {
@@ -27,6 +28,8 @@
     exportChanged: document.querySelector("#exportChanged"),
     exportManifest: document.querySelector("#exportManifest"),
     clearAll: document.querySelector("#clearAll"),
+    enableRiskEditing: document.querySelector("#enableRiskEditing"),
+    riskStatus: document.querySelector("#riskStatus"),
     choiceTemplate: document.querySelector("#choiceRowTemplate")
   };
 
@@ -62,6 +65,8 @@
     els.fileCount.textContent = state.files.length;
     els.exportManifest.disabled = state.files.length === 0;
     els.exportChanged.disabled = !state.files.some(file => file.dirty);
+    els.riskStatus.textContent = state.riskAccepted ? "Editing enabled" : "Editing locked";
+    els.enableRiskEditing.disabled = state.riskAccepted;
     renderFileList();
     renderFileView();
   }
@@ -74,7 +79,7 @@
       button.className = `file-item ${file.id === state.selectedId ? "active" : ""}`;
       button.innerHTML = `
         <span>${escapeHtml(shortName(file.name))}</span>
-        <small>${escapeHtml(window.TWD_GAME_LABELS[file.game] || "Unknown")} · ${escapeHtml(file.type)}${file.dirty ? " · edited" : ""}</small>
+        <small>${escapeHtml(window.TWD_GAME_LABELS[file.game] || "Unknown")} / ${escapeHtml(file.type)}${file.dirty ? " / edited" : ""}</small>
       `;
       button.addEventListener("click", () => {
         state.selectedId = file.id;
@@ -115,9 +120,11 @@
     for (const choice of found) {
       const row = els.choiceTemplate.content.firstElementChild.cloneNode(true);
       row.querySelector(".choice-title").textContent = choice.title;
-      row.querySelector(".choice-desc").textContent = `${choice.episode || "Choice"} · ${choice.description} Offset ${choice.offset}.`;
+      row.querySelector(".choice-desc").textContent = `${choice.episode || "Choice"} / ${choice.description} Offset ${choice.offset}.`;
       row.querySelector(".choice-key").textContent = choice.encodedText;
       const select = row.querySelector(".choice-select");
+      select.disabled = !state.riskAccepted;
+      select.title = state.riskAccepted ? "" : "Enable save editing first";
       for (const value of choice.values) {
         const option = document.createElement("option");
         option.value = value;
@@ -150,18 +157,26 @@
         <div>
           <h3>${escapeHtml(preset.title)}</h3>
           <p>${escapeHtml(preset.description)}</p>
-          <small>${foundKeys.length} detected target${foundKeys.length === 1 ? "" : "s"} · ${changes.length} change${changes.length === 1 ? "" : "s"} needed</small>
+          <small>${foundKeys.length} detected target${foundKeys.length === 1 ? "" : "s"} / ${changes.length} change${changes.length === 1 ? "" : "s"} needed</small>
         </div>
-        <button type="button">Apply where safe</button>
+        <button type="button">${state.riskAccepted ? "Apply risky preset" : "Enable editing first"}</button>
       `;
-      card.querySelector("button").addEventListener("click", () => applyPreset(file, preset));
+      const button = card.querySelector("button");
+      button.disabled = !state.riskAccepted;
+      button.addEventListener("click", () => applyPreset(file, preset));
       els.presets.append(card);
     }
   }
 
   function applyPreset(file, preset) {
+    if (!state.riskAccepted) {
+      alert("Save editing is locked. Read the warning and enable editing first.");
+      return;
+    }
+
     let changed = 0;
     let skipped = 0;
+    let risky = 0;
     const failures = [];
 
     for (const [key, value] of Object.entries(preset.values)) {
@@ -170,7 +185,13 @@
       const nextText = choice.key.startsWith("WalkingDead")
         ? value
         : window.TWDSaveFormat.choiceLabel(choice.key, value);
-      const result = window.TWDSaveFormat.patchAscii(file.bytes, choice.offset, choice.encodedText, nextText);
+      const result = window.TWDSaveFormat.patchAscii(
+        file.bytes,
+        choice.offset,
+        choice.encodedText,
+        nextText,
+        { allowResize: true }
+      );
       if (!result.ok) {
         skipped += 1;
         failures.push(`${choice.title}: ${result.reason}`);
@@ -181,22 +202,35 @@
       file.strings = extractStringsAgain(file);
       file.knownChoices = window.TWDSaveFormat.detectKnownChoices(file);
       changed += 1;
+      if (result.warning) risky += 1;
     }
 
-    setStatus(`${preset.title} preset: ${changed} applied, ${skipped} skipped`);
+    setStatus(`${preset.title} preset: ${changed} applied, ${skipped} skipped, ${risky} risky length edits`);
     if (failures.length) {
-      alert(`Some edits were skipped to avoid corrupting the save:\n\n${failures.join("\n")}`);
+      alert(`Some edits were skipped:\n\n${failures.join("\n")}`);
     }
     render();
   }
 
   function applyChoice(file, choice, value) {
+    if (!state.riskAccepted) {
+      alert("Save editing is locked. Read the warning and enable editing first.");
+      render();
+      return;
+    }
+
     const nextText = choice.key.startsWith("WalkingDead")
       ? value
       : window.TWDSaveFormat.choiceLabel(choice.key, value);
-    const result = window.TWDSaveFormat.patchAscii(file.bytes, choice.offset, choice.encodedText, nextText);
+    const result = window.TWDSaveFormat.patchAscii(
+      file.bytes,
+      choice.offset,
+      choice.encodedText,
+      nextText,
+      { allowResize: true }
+    );
     if (!result.ok) {
-      alert(`${result.reason}\n\nThis first version only applies same-length edits to avoid corrupting saves.`);
+      alert(result.reason);
       render();
       return;
     }
@@ -204,7 +238,7 @@
     file.dirty = true;
     file.strings = extractStringsAgain(file);
     file.knownChoices = window.TWDSaveFormat.detectKnownChoices(file);
-    setStatus(`Edited ${shortName(file.name)}`);
+    setStatus(result.warning ? `Risky edit applied to ${shortName(file.name)}` : `Edited ${shortName(file.name)}`);
     render();
   }
 
@@ -284,6 +318,7 @@
     const manifest = {
       app: "Telltale Walking Dead Save Editor",
       createdAt: new Date().toISOString(),
+      warning: "Edited files may corrupt saves. Keep backups.",
       files: state.files.map(file => ({
         name: file.name,
         game: file.game,
@@ -342,6 +377,13 @@
   els.folderInput.addEventListener("change", event => addFiles(event.target.files));
   els.exportChanged.addEventListener("click", exportChangedFiles);
   els.exportManifest.addEventListener("click", exportManifest);
+  els.enableRiskEditing.addEventListener("click", () => {
+    const accepted = confirm("Save editing can corrupt your save files. Back up your save folder first. By enabling editing, you accept the risk and responsibility for any lost progress or broken saves.");
+    if (!accepted) return;
+    state.riskAccepted = true;
+    setStatus("Risk accepted. Save editing enabled.");
+    render();
+  });
   els.clearAll.addEventListener("click", () => {
     state.files = [];
     state.selectedId = null;

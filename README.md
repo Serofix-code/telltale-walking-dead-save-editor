@@ -23,6 +23,10 @@ The app runs in your browser and does not upload saves anywhere. It can inspect 
 
 Do not edit saves while the game is running. If Steam Cloud asks which files to keep, choose local files when you want to keep your edits.
 
+## Save Editing Warning
+
+Back up your entire save folder before changing anything. Telltale saves are binary files, and editing them can corrupt saves, break checkpoints, or make the game fail to load a slot. The web app locks editing until the user clicks the risk acknowledgement button. By enabling save editing, the user accepts the risk and responsibility for their own saves. The authors are not responsible for lost progress, corrupted files, or broken saves.
+
 ## Current Status
 
 This is an early, conservative editor. It avoids risky binary rewrites where the file format is not fully mapped yet.
