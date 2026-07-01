@@ -52,6 +52,16 @@ Default Definitive Series save folder on Windows:
 Documents\Telltale Games\The Walking Dead Definitive
 ```
 
+Common files:
+
+- `wd1_saveslot1.bundle`, `wd1_saveslot2.bundle`, `wd1_saveslot3.bundle`: Season 1 slots
+- `_wd1_saveslot1_autosave.bundle`: Season 1 slot autosave/checkpoint
+- `wd2_saveSlot1.bundle`: Season 2 slot
+- `wdm_saveSlot1.bundle`: Michonne slot
+- `wd3_saveslot1...`: A New Frontier slot/state files
+- `wd4_saveslot1.bundle`: The Final Season slot
+- `prefs.prop`: selected save/menu preferences
+
 ## Use
 
 Open `index.html` in a modern browser, then select your save folder or drag files into the page.
